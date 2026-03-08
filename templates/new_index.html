@@ -1,0 +1,157 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+<title>Print Shipping Labels</title>
+</head>
+
+<body>
+
+<h2>Select Date to Print Labels</h2>
+
+<input type="date" id="datePicker">
+
+<button onclick="generate()">Generate PDF</button>
+
+<script>
+
+function generate(){
+
+    const date = document.getElementById("datePicker").value
+
+    if(!date){
+        alert("Please select date")
+        return
+    }
+
+    const formatted = date.split("-").reverse().join("-")
+
+    window.open("/generate_labels?date=" + formatted)
+
+}
+
+</script>
+
+</body>
+</html>
+ -->
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Print Shipping Labels</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            padding: 40px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+
+        table {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 60%;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <h2>Select Date to Fetch Orders</h2>
+
+    <input type="date" id="datePicker">
+
+    <br>
+
+    <button onclick="fetchOrders()">Fetch Orders</button>
+
+    <button onclick="generatePDF()">Generate PDF</button>
+
+    <h3>Orders</h3>
+
+    <table id="ordersTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+
+        <tbody></tbody>
+
+    </table>
+
+    <script>
+
+        let selectedDate = ""
+
+        async function fetchOrders() {
+
+            const date = document.getElementById("datePicker").value
+
+            if (!date) {
+                alert("Please select date")
+                return
+            }
+
+            selectedDate = date.split("-").reverse().join("-")
+
+            const response = await fetch("/get_orders?date=" + selectedDate)
+
+            const data = await response.json()
+
+            const tbody = document.querySelector("#ordersTable tbody")
+
+            tbody.innerHTML = ""
+
+            if (data.length === 0) {
+                alert("No orders found")
+                return
+            }
+
+            data.forEach(order => {
+
+                const row = `
+        <tr>
+            <td>${order.toName}</td>
+            <td>${order.toAddress}</td>
+        </tr>
+        `
+
+                tbody.innerHTML += row
+            })
+        }
+
+        function generatePDF() {
+
+            if (!selectedDate) {
+                alert("Please fetch orders first")
+                return
+            }
+
+            const confirmGenerate = confirm("Generate PDF for displayed orders?")
+
+            if (confirmGenerate) {
+                window.open("/generate_labels?date=" + selectedDate)
+            }
+
+        }
+
+    </script>
+
+</body>
+
+</html>
