@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CR Fashions — Shipping Manager</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --ink: #1a1209;
+      --cream: #faf6ef;
+      --gold: #c9922a;
+      --gold-lt: #f0d9a8;
+      --rust: #b84c1e;
+      --surface: #ffffff;
+      --border: #e8dcc8;
+      --muted: #7a6a52;
+      --success: #3a7d44;
+      --error: #b84c1e;
+      --shadow: 0 4px 24px rgba(26, 18, 9, .10);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--ink);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, .3);
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--gold);
+      letter-spacing: .04em;
+    }
+
+    .logo span {
+      color: #fff;
+      font-weight: 300;
+      font-size: 1rem;
+      margin-left: .5rem;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    nav {
+      display: flex;
+      gap: .25rem;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem;
+      font-weight: 500;
+      padding: .5rem 1.1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      letter-spacing: .03em;
+      transition: all .2s;
+    }
+
+    nav button:hover {
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+    }
+
+    nav button.active {
+      background: var(--gold);
+      color: var(--ink);
+    }
+
+    nav button .lock {
+      font-size: .75rem;
+      margin-left: .25rem;
+      opacity: .7;
+    }
+
+    .admin-badge {
+      background: var(--gold);
+      color: var(--ink);
+      font-size: .72rem;
+      font-weight: 700;
+      padding: .25rem .6rem;
+      border-radius: 20px;
+      letter-spacing: .04em;
+      display: none;
+    }
+
+    .admin-badge.visible {
+      display: inline-block;
+    }
+
+    .btn-logout {
+      background: rgba(255, 255, 255, .1);
+      border: 1px solid rgba(255, 255, 255, .2);
+      color: #ccc;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .8rem;
+      font-weight: 500;
+      padding: .4rem .9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all .2s;
+      display: none;
+    }
+
+    .btn-logout.visible {
+      display: inline-block;
+    }
+
+    .btn-logout:hover {
+      background: rgba(255, 255, 255, .15);
+      color: #fff;
+    }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 6, 2, .75);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .4);
+      transform: translateY(20px);
+      transition: transform .25s;
+    }
+
+    .modal-overlay.open .modal {
+      transform: translateY(0);
+    }
+
+    .modal-icon {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: .75rem;
+    }
+
+    .modal h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      text-align: center;
+      margin-bottom: .4rem;
+    }
+
+    .modal p {
+      color: var(--muted);
+      font-size: .88rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal label {
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: .75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      background: var(--cream);
+      outline: none;
+      transition: border-color .2s;
+      margin-bottom: 1rem;
+    }
+
+    .modal input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201, 146, 42, .15);
+      background: #fff;
+    }
+
+    .modal-error {
+      background: #fef2f0;
+      border: 1px solid #f5c6bc;
+      color: var(--error);
+      border-radius: 8px;
+      padding: .6rem .9rem;
+      font-size: .85rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .modal-error.show {
+      display: block;
+    }
+
+    .modal-btn-row {
+      display: flex;
+      gap: .75rem;
+    }
+
+    .modal-btn-row button {
+      flex: 1;
+    }
+
+    /* ── TABS ── */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* ── HERO BAND ── */
+    .hero-band {
+      background: linear-gradient(135deg, var(--ink) 0%, #2d1f0a 100%);
+      color: #fff;
+      padding: 2.5rem 2rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-band::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(201, 146, 42, .04) 30px, rgba(201, 146, 42, .04) 60px);
+    }
+
+    .hero-band h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      position: relative;
+    }
+
+    .hero-band p {
+      color: #b8a888;
+      margin-top: .4rem;
+      font-size: .95rem;
+      position: relative;
+    }
+
+    .page-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-head {
+      padding: 1.2rem 1.6rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .card-head .icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gold-lt);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+    }
+
+    .card-head h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--ink);
+    }
+
+    .card-body {
+      padding: 1.6rem;
+    }
+
+    /* ── FORM ── */
+    .form-grid {
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: .75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      color: var(--ink);
+      background: var(--cream);
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201, 146, 42, .15);
+      background: #fff;
+    }
+
+    input[readonly] {
+      background: #f5f0e8;
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .8rem 1.6rem;
+      border: none;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .02em;
+    }
+
+    .btn-primary {
+      background: var(--gold);
+      color: var(--ink);
+    }
+
+    .btn-primary:hover {
+      background: #b87e22;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(201, 146, 42, .35);
+    }
+
+    .btn-secondary {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .btn-secondary:hover {
+      background: #2d1f0a;
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      color: var(--ink);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .btn-danger {
+      background: var(--rust);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #9a3d16;
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    /* ── TOAST ── */
+    .toast-wrap {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      z-index: 9999;
+    }
+
+    .toast {
+      padding: .85rem 1.3rem;
+      border-radius: 10px;
+      font-size: .9rem;
+      font-weight: 500;
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .18);
+      animation: slideIn .3s ease;
+      max-width: 340px;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+
+    .toast.success {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .toast.error {
+      background: var(--error);
+      color: #fff;
+    }
+
+    .toast.info {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .9rem;
+    }
+
+    thead {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    th {
+      padding: .75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: .78rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: .7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:nth-child(even) td {
+      background: #faf6ef55;
+    }
+
+    tr:hover td {
+      background: var(--gold-lt);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: .2rem .6rem;
+      border-radius: 20px;
+      font-size: .72rem;
+      font-weight: 600;
+      background: var(--gold-lt);
+      color: var(--gold);
+      letter-spacing: .03em;
+    }
+
+    /* ── DATE ROW ── */
+    .date-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .date-row>div {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--muted);
+    }
+
+    .empty-state .big-icon {
+      font-size: 3rem;
+      margin-bottom: .75rem;
+    }
+
+    /* ── SPINNER ── */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255, 255, 255, .4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── STATS ── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-card .num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .stat-card .lbl {
+      font-size: .78rem;
+      color: var(--muted);
+      margin-top: .3rem;
+      font-weight: 500;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 500px) {
+      .stats-bar {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* ── ADMIN LOCK SCREEN ── */
+    .lock-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 2rem;
+      text-align: center;
+    }
+
+    .lock-screen .lock-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: .4;
+    }
+
+    .lock-screen h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--muted);
+      margin-bottom: .5rem;
+    }
+
+    .lock-screen p {
+      color: var(--muted);
+      font-size: .9rem;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">CR FASHIONS <span>Shipping Manager</span></div>
+    <div class="header-right">
+      <span class="admin-badge" id="adminBadge">🔐 ADMIN</span>
+      <nav>
+        <button class="active" id="navSubmit" onclick="switchTab('submit', this)">📦 New Order</button>
+        <button id="navOrders" onclick="handleOrdersTabClick(this)">📋 Orders & Labels <span class="lock"
+            id="tabLock">🔒</span></button>
+      </nav>
+      <button class="btn-logout" id="logoutBtn" onclick="adminLogout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- ═══ ADMIN LOGIN MODAL ═══ -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal">
+      <div class="modal-icon">🔐</div>
+      <h2>Admin Access</h2>
+      <p>This section is restricted to authorized personnel only. Enter the admin password to continue.</p>
+      <div class="modal-error" id="loginError">Incorrect password. Please try again.</div>
+      <label for="adminPass">Admin Password</label>
+      <input type="password" id="adminPass" placeholder="Enter password"
+        onkeydown="if(event.key==='Enter') doLogin()" />
+      <div class="modal-btn-row">
+        <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="loginBtn" onclick="doLogin()">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ TAB 1: SUBMIT ORDER ════ -->
+  <div id="tab-submit" class="tab-content active">
+    <div class="hero-band">
+      <h2>New Shipping Order</h2>
+      <p>Fill in recipient details — data is saved instantly to Excel</p>
+    </div>
+    <div class="page-body">
+      <div class="card">
+        <div class="card-head">
+          <div class="icon">📍</div>
+          <h3>Recipient Details</h3>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div>
+              <label for="toName">Recipient Name *</label>
+              <input type="text" id="toName" placeholder="Enter recipient's full name" />
+            </div>
+            <div>
+              <label for="toFullAddress">Full Address (include Phone Number) *</label>
+              <textarea id="toFullAddress"
+                placeholder="Door No, Street, Landmark, City, State, Pincode&#10;Phone: XXXXXXXXXX"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="icon">👤</div>
+          <h3>Sender Details</h3>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div>
+              <label for="fromName">From Name</label>
+              <input type="text" id="fromName" value="CR FASHIONS" readonly />
+            </div>
+            <div>
+              <label for="fromPhone">From Phone</label>
+              <input type="tel" id="fromPhone" value="7032208265" readonly />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="submitBtn" onclick="submitOrder()">✓ Save Order to Excel</button>
+        <button class="btn btn-outline" onclick="clearForm()">↺ Clear Form</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ TAB 2: ORDERS & LABELS (ADMIN ONLY) ════ -->
+  <div id="tab-orders" class="tab-content">
+    <!-- Lock screen shown when not admin -->
+    <div id="lockScreen" class="lock-screen">
+      <div class="lock-icon">🔒</div>
+      <h3>Admin Access Required</h3>
+      <p>You need to log in as admin to view orders and generate labels.</p>
+      <button class="btn btn-primary" onclick="openModal()">🔐 Login as Admin</button>
+    </div>
+
+    <!-- Admin content shown when logged in -->
+    <div id="adminContent" style="display:none;">
+      <div class="hero-band">
+        <h2>Orders & Label Generator</h2>
+        <p>Filter by date, preview orders, and generate shipping label PDFs</p>
+      </div>
+      <div class="page-body">
+        <div class="stats-bar">
+          <div class="stat-card">
+            <div class="num" id="statTotal">—</div>
+            <div class="lbl">Total Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" id="statFiltered">—</div>
+            <div class="lbl">Filtered</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" id="statToday">—</div>
+            <div class="lbl">Today</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <div class="icon">📅</div>
+            <h3>Filter by Date</h3>
+          </div>
+          <div class="card-body">
+            <div class="date-row">
+              <div>
+                <label for="datePicker">Select Date</label>
+                <input type="date" id="datePicker" />
+              </div>
+              <div style="display:flex; gap:.75rem; align-items:flex-end;">
+                <button class="btn btn-secondary" id="fetchBtn" onclick="fetchOrders()">🔍 Fetch Orders</button>
+                <button class="btn btn-outline" onclick="fetchAllOrders()">Show All</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head" style="justify-content:space-between; flex-wrap:wrap; gap:.5rem;">
+            <div style="display:flex; align-items:center; gap:.75rem;">
+              <div class="icon">📋</div>
+              <h3>Orders <span id="orderCount" class="badge">0</span></h3>
+            </div>
+            <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+              <button class="btn btn-outline" onclick="downloadExcel()">⬇ Excel</button>
+              <button class="btn btn-danger" id="pdfBtn" onclick="generatePDF()" disabled>🖨 Generate PDF
+                Labels</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div id="tableContainer">
+              <div class="empty-state">
+                <div class="big-icon">📦</div>
+                <p>Select a date and click <strong>Fetch Orders</strong> to load data</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    // ── AUTH STATE ──────────────────────────────────────────────────────────────
+    let adminToken = sessionStorage.getItem('adminToken') || null;
+
+    function isAdminLoggedIn() { return !!adminToken; }
+
+    function applyAuthUI() {
+      const loggedIn = isAdminLoggedIn();
+      document.getElementById('adminBadge').classList.toggle('visible', loggedIn);
+      document.getElementById('logoutBtn').classList.toggle('visible', loggedIn);
+      document.getElementById('tabLock').textContent = loggedIn ? '✓' : '🔒';
+      document.getElementById('tabLock').style.opacity = loggedIn ? '.6' : '.7';
+
+      // If orders tab is active, show correct content
+      if (document.getElementById('tab-orders').classList.contains('active')) {
+        showOrdersContent(loggedIn);
+      }
+    }
+
+    function showOrdersContent(loggedIn) {
+      document.getElementById('lockScreen').style.display = loggedIn ? 'none' : 'flex';
+      document.getElementById('adminContent').style.display = loggedIn ? 'block' : 'none';
+      if (loggedIn) loadStats();
+    }
+
+    // ── MODAL ───────────────────────────────────────────────────────────────────
+    function openModal() {
+      document.getElementById('loginModal').classList.add('open');
+      document.getElementById('adminPass').value = '';
+      document.getElementById('loginError').classList.remove('show');
+      setTimeout(() => document.getElementById('adminPass').focus(), 100);
+    }
+
+    function closeModal() {
+      document.getElementById('loginModal').classList.remove('open');
+    }
+
+    async function doLogin() {
+      const password = document.getElementById('adminPass').value;
+      if (!password) return;
+
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Verifying...';
+
+      try {
+        const res = await fetch('/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          adminToken = data.token;
+          sessionStorage.setItem('adminToken', adminToken);
+          closeModal();
+          applyAuthUI();
+          showOrdersContent(true);
+          showToast('✓ Admin access granted', 'success');
+        } else {
+          document.getElementById('loginError').classList.add('show');
+          document.getElementById('adminPass').value = '';
+          document.getElementById('adminPass').focus();
+        }
+      } catch (err) {
+        showToast('Login error: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = 'Unlock';
+      }
+    }
+
+    async function adminLogout() {
+      try {
+        await fetch('/admin/logout', {
+          method: 'POST',
+          headers: { 'x-admin-token': adminToken }
+        });
+      } catch (e) { }
+      adminToken = null;
+      sessionStorage.removeItem('adminToken');
+      applyAuthUI();
+      // Switch to submit tab
+      switchTab('submit', document.getElementById('navSubmit'));
+      showToast('Logged out successfully', 'info');
+    }
+
+    // ── TAB SWITCHING ───────────────────────────────────────────────────────────
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function handleOrdersTabClick(btn) {
+      switchTab('orders', btn);
+      if (!isAdminLoggedIn()) {
+        openModal();
+      } else {
+        showOrdersContent(true);
+      }
+    }
+
+    // ── TOAST ───────────────────────────────────────────────────────────────────
+    function showToast(msg, type = 'info', duration = 3500) {
+      const wrap = document.getElementById('toastWrap');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      const icons = { success: '✓', error: '✗', info: 'ℹ' };
+      t.innerHTML = `<span>${icons[type]}</span> ${msg}`;
+      wrap.appendChild(t);
+      setTimeout(() => { t.style.animation = 'slideIn .3s ease reverse'; setTimeout(() => t.remove(), 280); }, duration);
+    }
+
+    // ── SUBMIT ORDER ─────────────────────────────────────────────────────────
+    async function submitOrder() {
+      const toName = document.getElementById('toName').value.trim();
+      const toAddress = document.getElementById('toFullAddress').value.trim();
+      const fromName = document.getElementById('fromName').value.trim();
+      const fromPhone = document.getElementById('fromPhone').value.trim();
+
+      if (!toName) { showToast('Recipient name is required', 'error'); return; }
+      if (!toAddress) { showToast('Address is required', 'error'); return; }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Saving...';
+
+      try {
+        const res = await fetch('/submit_order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ toName, toAddress, fromName, fromPhone })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`✓ Order saved! S.No: ${data.sNo} — ${data.dateStr}`, 'success');
+          clearForm();
+        } else {
+          showToast(data.error || 'Failed to save', 'error');
+        }
+      } catch (err) {
+        showToast('Network error: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✓ Save Order to Excel';
+      }
+    }
+
+    function clearForm() {
+      document.getElementById('toName').value = '';
+      document.getElementById('toFullAddress').value = '';
+    }
+
+    // ── ADMIN FETCH HELPER ───────────────────────────────────────────────────
+    function adminHeaders() {
+      return { 'x-admin-token': adminToken };
+    }
+
+    // ── STATS ────────────────────────────────────────────────────────────────
+    async function loadStats() {
+      try {
+        const res = await fetch('/get_orders', { headers: adminHeaders() });
+        if (!res.ok) return;
+        const all = await res.json();
+
+        const now = new Date();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const todayStr = `${mm}-${dd}-${now.getFullYear()}`;
+        const todayCount = all.filter(r => r.date === todayStr).length;
+
+        document.getElementById('statTotal').textContent = all.length;
+        document.getElementById('statFiltered').textContent = '—';
+        document.getElementById('statToday').textContent = todayCount;
+      } catch (e) { }
+    }
+
+    // ── FETCH ORDERS ─────────────────────────────────────────────────────────
+    let currentOrders = [];
+    let currentDateParam = '';
+
+    async function fetchOrders() {
+      const dateVal = document.getElementById('datePicker').value;
+      if (!dateVal) { showToast('Please select a date first', 'error'); return; }
+      const [y, m, d] = dateVal.split('-');
+      currentDateParam = `${m}-${d}-${y}`;
+      await doFetch('/get_orders?date=' + currentDateParam);
+    }
+
+    async function fetchAllOrders() {
+      currentDateParam = '';
+      await doFetch('/get_orders');
+      document.getElementById('datePicker').value = '';
+    }
+
+    async function doFetch(url) {
+      const btn = document.getElementById('fetchBtn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Loading...';
+      try {
+        const res = await fetch(url, { headers: adminHeaders() });
+        if (res.status === 403) { showToast('Session expired. Please log in again.', 'error'); adminLogout(); return; }
+        const data = await res.json();
+        currentOrders = data;
+        renderTable(data);
+        document.getElementById('statFiltered').textContent = data.length;
+        document.getElementById('pdfBtn').disabled = data.length === 0;
+        showToast(data.length === 0 ? 'No orders found' : `${data.length} order(s) loaded`, data.length === 0 ? 'info' : 'success');
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '🔍 Fetch Orders';
+      }
+    }
+
+    function renderTable(orders) {
+      document.getElementById('orderCount').textContent = orders.length;
+      const container = document.getElementById('tableContainer');
+      if (orders.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="big-icon">🔍</div><p>No orders found.</p></div>`;
+        return;
+      }
+      const rows = orders.map((o, i) => `
+      <tr>
+        <td><span class="badge">#${i + 1}</span></td>
+        <td><strong>${esc(o.toName)}</strong></td>
+        <td style="max-width:300px;word-break:break-word;">${esc(o.toAddress)}</td>
+        <td>${esc(o.fromName || 'CR FASHIONS')}</td>
+        <td>${esc(o.date || '')}</td>
+        <td>${esc(o.time || '')}</td>
+      </tr>`).join('');
+      container.innerHTML = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>To Name</th><th>Address</th><th>From</th><th>Date</th><th>Time</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    }
+
+    function esc(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function generatePDF() {
+      // If no date param, try reading from the date picker directly
+      if (!currentDateParam) {
+        const dateVal = document.getElementById('datePicker').value;
+        if (!dateVal) { showToast('Please fetch orders for a specific date first', 'error'); return; }
+        const [y, m, d] = dateVal.split('-');
+        currentDateParam = m + '-' + d + '-' + y;
+      }
+      if (currentOrders.length === 0) { showToast('No orders loaded to generate PDF', 'error'); return; }
+      if (!confirm('Generate PDF for ' + currentOrders.length + ' order(s) on ' + currentDateParam + '?')) return;
+      window.open('/generate_labels?date=' + currentDateParam + '&adminToken=' + adminToken, '_blank');
+      showToast('Generating PDF...', 'info');
+    }
+
+    function downloadExcel() {
+      window.open(`/download_excel?adminToken=${adminToken}`, '_blank');
+      showToast('Downloading Excel...', 'info');
+    }
+
+    // ── INIT ─────────────────────────────────────────────────────────────────
+    const now = new Date();
+    document.getElementById('datePicker').value =
+      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+    // Verify saved token on page load
+    (async () => {
+      if (adminToken) {
+        try {
+          const res = await fetch('/admin/verify', { headers: adminHeaders() });
+          const data = await res.json();
+          if (!data.admin) { adminToken = null; sessionStorage.removeItem('adminToken'); }
+        } catch (e) { adminToken = null; }
+      }
+      applyAuthUI();
+    })();
+  </script>
+</body>
+
+</html>

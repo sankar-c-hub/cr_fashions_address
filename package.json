@@ -1,0 +1,19 @@
+{
+  "name": "cr-fashions-shipping",
+  "version": "2.0.0",
+  "description": "CR Fashions unified shipping manager",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "express": "^4.18.2",
+    "pdfkit": "^0.14.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
