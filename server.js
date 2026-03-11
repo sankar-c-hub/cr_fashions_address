@@ -6,7 +6,7 @@ const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // Load .env file if present (for local development)
-try { require("dotenv").config(); } catch(e) {}
+try { require("dotenv").config(); } catch (e) { }
 
 const app = express();
 app.use(express.json());
@@ -20,11 +20,11 @@ app.use(express.static(path.join(__dirname, "public")));
 //   GITHUB_REPO   = cr-fashions-data           ← a private repo you create
 //   GITHUB_FILE   = orders.json                ← file path inside that repo
 //
-const GH_TOKEN = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
+const GH_TOKEN = process.env.GH_TOKEN || "";
 const GH_OWNER = "sankar-c-hub";
-const GH_REPO  = "cr-fashions-data";
-const GH_FILE  = "data/orders.json";
-const GH_API   = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
+const GH_REPO = "cr-fashions-data";
+const GH_FILE = "data/orders.json";
+const GH_API = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}`;
 
 function ghHeaders() {
   return {
@@ -41,7 +41,7 @@ async function readOrders() {
     const res = await fetch(GH_API, { headers: ghHeaders() });
     if (res.status === 404) return { orders: [], sha: null }; // file doesn't exist yet
     if (!res.ok) throw new Error(`GitHub read failed: ${res.status}`);
-    const data    = await res.json();
+    const data = await res.json();
     const content = Buffer.from(data.content, "base64").toString("utf8");
     return { orders: JSON.parse(content) || [], sha: data.sha };
   } catch (e) {
@@ -72,7 +72,7 @@ async function writeOrders(orders, sha) {
 }
 
 // ─── ADMIN AUTH ───────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "sankar4263";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "crfashions@2026";
 const activeSessions = new Set();
 
 function generateToken() { return crypto.randomBytes(32).toString("hex"); }
@@ -89,14 +89,14 @@ function requireAdmin(req, res, next) {
 }
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const DEFAULT_FROM_NAME  = "CR FASHIONS";
+const DEFAULT_FROM_NAME = "CR FASHIONS";
 const DEFAULT_FROM_PHONE = "7032208265";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function getTodayStr() {
-  const now  = new Date();
-  const dd   = String(now.getDate()).padStart(2, "0");
-  const mm   = String(now.getMonth() + 1).padStart(2, "0");
+  const now = new Date();
+  const dd = String(now.getDate()).padStart(2, "0");
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
   const yyyy = now.getFullYear();
   return `${mm}-${dd}-${yyyy}`;
 }
@@ -139,7 +139,7 @@ app.post("/submit_order", async (req, res) => {
       return res.status(400).json({ error: "Name and address are required" });
 
     const { orders, sha } = await readOrders();
-    const id      = orders.length + 1;
+    const id = orders.length + 1;
     const dateStr = getTodayStr();
     const timeStr = getTimeStr();
 
@@ -147,7 +147,7 @@ app.post("/submit_order", async (req, res) => {
       id,
       toName,
       toAddress,
-      fromName:  fromName  || DEFAULT_FROM_NAME,
+      fromName: fromName || DEFAULT_FROM_NAME,
       fromPhone: fromPhone || DEFAULT_FROM_PHONE,
       date: dateStr,
       time: timeStr,
@@ -215,7 +215,7 @@ app.get("/generate_labels", requireAdmin, async (req, res) => {
     if (!date) return res.status(400).json({ error: "Date parameter required" });
 
     const { orders } = await readOrders();
-    const filtered   = orders.filter((o) => o.date === date);
+    const filtered = orders.filter((o) => o.date === date);
 
     if (filtered.length === 0)
       return res.status(404).json({ message: `No orders found for ${date}` });
@@ -226,21 +226,21 @@ app.get("/generate_labels", requireAdmin, async (req, res) => {
     doc.pipe(res);
 
     const PAGE_HEIGHT = 841;
-    const MARGIN      = 30;
-    const COL_WIDTH   = 270;
-    const GAP         = 12;
-    const TEXT_WIDTH  = 260 - 12 * 2;
-    const LINE_GAP    = 3;
+    const MARGIN = 30;
+    const COL_WIDTH = 270;
+    const GAP = 12;
+    const TEXT_WIDTH = 260 - 12 * 2;
+    const LINE_GAP = 3;
 
     function measureLabelHeight(order) {
       doc.font("Helvetica").fontSize(11);
-      const address   = (order.toAddress || "").replace(/\s*\n\s*/g, ", ").replace(/,\s*,/g, ",").trim();
-      const nameH     = doc.heightOfString(`Name: ${order.toName || ""}`,   { width: TEXT_WIDTH, lineGap: LINE_GAP });
-      const addrLblH  = doc.heightOfString("Address:",                       { width: TEXT_WIDTH, lineGap: LINE_GAP });
-      const addrH     = doc.heightOfString(address,                          { width: TEXT_WIDTH, lineGap: LINE_GAP });
-      const fromNameH = doc.heightOfString(`Name: ${order.fromName || ""}`,  { width: TEXT_WIDTH, lineGap: LINE_GAP });
-      const phoneH    = doc.heightOfString(`Phone: ${order.fromPhone || ""}`,{ width: TEXT_WIDTH, lineGap: LINE_GAP });
-      const unboxH    = doc.heightOfString("UNBOX VIDEO IS MANDATORY",       { width: TEXT_WIDTH, lineGap: LINE_GAP });
+      const address = (order.toAddress || "").replace(/\s*\n\s*/g, ", ").replace(/,\s*,/g, ",").trim();
+      const nameH = doc.heightOfString(`Name: ${order.toName || ""}`, { width: TEXT_WIDTH, lineGap: LINE_GAP });
+      const addrLblH = doc.heightOfString("Address:", { width: TEXT_WIDTH, lineGap: LINE_GAP });
+      const addrH = doc.heightOfString(address, { width: TEXT_WIDTH, lineGap: LINE_GAP });
+      const fromNameH = doc.heightOfString(`Name: ${order.fromName || ""}`, { width: TEXT_WIDTH, lineGap: LINE_GAP });
+      const phoneH = doc.heightOfString(`Phone: ${order.fromPhone || ""}`, { width: TEXT_WIDTH, lineGap: LINE_GAP });
+      const unboxH = doc.heightOfString("UNBOX VIDEO IS MANDATORY", { width: TEXT_WIDTH, lineGap: LINE_GAP });
       return 10 + 16 + 6 + nameH + 6 + addrLblH + 4 + addrH + 12 + 16 + 6 + fromNameH + 6 + phoneH + 8 + unboxH + 14;
     }
 
@@ -253,9 +253,9 @@ app.get("/generate_labels", requireAdmin, async (req, res) => {
       if (rowY + rowHeight > PAGE_HEIGHT - MARGIN) { doc.addPage(); rowY = MARGIN; }
       pair.forEach((order, colIndex) => {
         drawLabel(doc, MARGIN + colIndex * COL_WIDTH, rowY, {
-          toName:    order.toName    || "",
+          toName: order.toName || "",
           toAddress: order.toAddress || "",
-          fromName:  order.fromName  || DEFAULT_FROM_NAME,
+          fromName: order.fromName || DEFAULT_FROM_NAME,
           fromPhone: order.fromPhone || DEFAULT_FROM_PHONE,
         });
       });
@@ -284,10 +284,10 @@ app.get("/generate_label_single", requireAdmin, async (req, res) => {
     res.setHeader("Content-Disposition", `attachment; filename=label_${id}.pdf`);
     doc.pipe(res);
 
-    drawLabel(doc, 20, 20, {
-      toName:    order.toName    || "",
+    drawLabel(doc, 15, 15, {
+      toName: order.toName || "",
       toAddress: order.toAddress || "",
-      fromName:  order.fromName  || DEFAULT_FROM_NAME,
+      fromName: order.fromName || DEFAULT_FROM_NAME,
       fromPhone: order.fromPhone || DEFAULT_FROM_PHONE,
     });
 
@@ -298,24 +298,23 @@ app.get("/generate_label_single", requireAdmin, async (req, res) => {
   }
 });
 
-// ─── PDF DRAWING ──────────────────────────────────────────────────────────────
 function drawLabel(doc, x, y, label) {
-  const width     = 260;
-  const padding   = 12;
+  const width = 260;
+  const padding = 12;
   const textWidth = width - padding * 2;
-  const fontSize  = 11;
-  const lineGap   = 3;
+  const fontSize = 11;   // ← 10 → 11
+  const lineGap = 3;
 
   doc.font("Helvetica").fontSize(fontSize);
 
   const address = (label.toAddress || "").replace(/\s*\n\s*/g, ", ").replace(/,\s*,/g, ",").trim();
 
-  const nameHeight    = doc.heightOfString(`Name: ${label.toName}`,    { width: textWidth, lineGap });
-  const addrLblHeight = doc.heightOfString("Address:",                  { width: textWidth, lineGap });
-  const addrHeight    = doc.heightOfString(address,                     { width: textWidth, lineGap });
-  const fromNameH     = doc.heightOfString(`Name: ${label.fromName}`,  { width: textWidth, lineGap });
-  const phoneH        = doc.heightOfString(`Phone: ${label.fromPhone}`,{ width: textWidth, lineGap });
-  const unboxH        = doc.heightOfString("UNBOX VIDEO IS MANDATORY", { width: textWidth, lineGap });
+  const nameHeight = doc.heightOfString(`Name: ${label.toName}`, { width: textWidth, lineGap });
+  const addrLblHeight = doc.heightOfString("Address:", { width: textWidth, lineGap });
+  const addrHeight = doc.heightOfString(address, { width: textWidth, lineGap });
+  const fromNameH = doc.heightOfString(`Name: ${label.fromName}`, { width: textWidth, lineGap });
+  const phoneH = doc.heightOfString(`Phone: ${label.fromPhone}`, { width: textWidth, lineGap });
+  const unboxH = doc.heightOfString("UNBOX VIDEO IS MANDATORY", { width: textWidth, lineGap });
 
   const totalHeight =
     10 + 16 + 6 +
@@ -330,34 +329,33 @@ function drawLabel(doc, x, y, label) {
   doc.rect(x, y, width, totalHeight).stroke();
   let cy = y + 10;
 
-  doc.font("Helvetica-Bold").fontSize(12).text("TO:", x + padding, cy, { underline: true });
+  doc.font("Helvetica-Bold").fontSize(12).text("TO:", x + padding, cy, { underline: true });      // ← 11 → 12
   cy += 16 + 6;
 
-  doc.font("Helvetica-Bold").text("Name: ", x + padding, cy, { continued: true, lineGap });
-  doc.font("Helvetica").text(label.toName, { lineGap });
+  doc.font("Helvetica-Bold").fontSize(11).text("Name: ", x + padding, cy, { continued: true, lineGap }); // ← 10 → 11
+  doc.font("Helvetica").fontSize(11).text(label.toName, { lineGap });                                     // ← 10 → 11
   cy += nameHeight + 6;
 
-  doc.font("Helvetica-Bold").text("Address:", x + padding, cy, { width: textWidth, lineGap });
+  doc.font("Helvetica-Bold").fontSize(11).text("Address:", x + padding, cy, { width: textWidth, lineGap }); // ← 10 → 11
   cy += addrLblHeight + 4;
 
-  doc.font("Helvetica").text(address, x + padding, cy, { width: textWidth, lineGap });
+  doc.font("Helvetica").fontSize(11).text(address, x + padding, cy, { width: textWidth, lineGap });          // ← 10 → 11
   cy += addrHeight + 12;
 
-  doc.font("Helvetica-Bold").fontSize(12).text("FROM:", x + padding, cy, { underline: true });
+  doc.font("Helvetica-Bold").fontSize(12).text("FROM:", x + padding, cy, { underline: true });               // ← 11 → 12
   cy += 16 + 6;
 
-  doc.font("Helvetica-Bold").text("Name: ", x + padding, cy, { continued: true, lineGap });
-  doc.font("Helvetica").text(label.fromName, { lineGap });
+  doc.font("Helvetica-Bold").fontSize(11).text("Name: ", x + padding, cy, { continued: true, lineGap });    // ← 10 → 11
+  doc.font("Helvetica").fontSize(11).text(label.fromName, { lineGap });                                      // ← 10 → 11
   cy += fromNameH + 6;
 
-  doc.font("Helvetica-Bold").text("Phone: ", x + padding, cy, { continued: true, lineGap });
-  doc.font("Helvetica").text(label.fromPhone, { lineGap });
+  doc.font("Helvetica-Bold").fontSize(11).text("Phone: ", x + padding, cy, { continued: true, lineGap });   // ← 10 → 11
+  doc.font("Helvetica").fontSize(11).text(label.fromPhone, { lineGap });                                     // ← 10 → 11
   cy += phoneH + 8;
 
   doc.font("Helvetica-Bold").fontSize(15)
     .text("UNBOX VIDEO IS MANDATORY", x + padding, cy, { width: textWidth, align: "center", lineGap });
 }
-
 // ─── START ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 4000;
 
@@ -372,7 +370,7 @@ async function initGitHubFile() {
     } else if (res.ok) {
       // File exists — just confirm token works
       const data = await res.json();
-      console.log(`✅ GitHub connected. orders.json found (sha: ${data.sha.slice(0,7)})`);
+      console.log(`✅ GitHub connected. orders.json found (sha: ${data.sha.slice(0, 7)})`);
     } else {
       const body = await res.text();
       console.error("⚠️  GitHub check failed:", res.status, body);
