@@ -72,7 +72,7 @@ async function writeOrders(orders, sha) {
 }
 
 // ─── ADMIN AUTH ───────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "crfashions@2026";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "sankar4263";
 const activeSessions = new Set();
 
 function generateToken() { return crypto.randomBytes(32).toString("hex"); }
